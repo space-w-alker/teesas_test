@@ -49,7 +49,7 @@ export class ProductService {
     const change: ChangeUnit[] = [];
     user.deposit = this.evaluateChange(user.deposit, change);
     await this.repo.save(product);
-    await this.userService.updateUser(user);
+    await this.userService.updateUser(user, user.username);
     return {
       totalSpent: totalCost,
       productPurchased: `${actualAmount} * ${product.productName}`,

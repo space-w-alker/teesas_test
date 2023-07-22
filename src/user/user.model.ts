@@ -3,11 +3,14 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Product } from '../product/product.model';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User {
@@ -15,6 +18,7 @@ export class User {
   username: string;
 
   @Column()
+  @Exclude()
   password: string;
 
   @Column()
@@ -26,6 +30,13 @@ export class User {
   @OneToMany(() => Product, (product) => product.seller)
   products: Product[];
 
+  @OneToMany(() => Session, (session) => session.user, {
+    cascade: true,
+    eager: true,
+  })
+  @Exclude()
+  sessions: Session[];
+
   @CreateDateColumn()
   dateCreated?: Date;
 
@@ -34,21 +45,29 @@ export class User {
 
   @DeleteDateColumn()
   dateDeleted?: Date;
+
+  token?: string;
+
+  warning?: string;
 }
 
-@Entity({})
+@Entity()
 export class Session {
   @PrimaryColumn()
   token: string;
 
+  @ManyToOne(() => User, (user) => user.sessions)
+  @JoinColumn()
+  user?: User;
+
   @CreateDateColumn()
-  dateCreated: Date;
+  dateCreated?: Date;
 
   @UpdateDateColumn()
-  dateUpdated: Date;
+  dateUpdated?: Date;
 
   @DeleteDateColumn()
-  dateDeleted: Date;
+  dateDeleted?: Date;
 }
 
 export enum Role {

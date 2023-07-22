@@ -4,7 +4,6 @@ import { UserService } from './user.service';
 import { ApiHeader } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 import { User } from './user.model';
-
 @ApiHeader({ name: 'authorizations', required: false, allowReserved: true })
 @Controller('user')
 export class UserController {

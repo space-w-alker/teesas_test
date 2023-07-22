@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Session } from './user/user.model';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
           synchronize: true,
           autoLoadEntities: true,
           migrations: [],
-          entities: [],
+          entities: [Session],
         };
       },
     }),

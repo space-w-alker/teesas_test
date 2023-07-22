@@ -1,11 +1,12 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from './auth/auth.guard';
-import { User } from './user/user.model';
+import { Role, User } from './user/user.model';
 import { UserService } from './user/user.service';
 import { DepositDto } from './user/user.dto';
 import { BuyProductDto } from './product/product.dto';
 import { ProductService } from './product/product.service';
 import { ApiHeader } from '@nestjs/swagger';
+import { Roles } from './decorators';
 
 @ApiHeader({ name: 'authorizations' })
 @Controller()
@@ -17,6 +18,7 @@ export class AppController {
 
   @Post('deposit')
   @UseGuards(AuthGuard)
+  @Roles(Role.BUYER)
   async deposit(
     @Req() req: Request & { user: User },
     @Body() deposit: DepositDto,
@@ -26,6 +28,7 @@ export class AppController {
 
   @Post('buy')
   @UseGuards(AuthGuard)
+  @Roles(Role.BUYER)
   async buy(
     @Req() req: Request & { user: User },
     @Body() buyDto: BuyProductDto,
@@ -35,5 +38,12 @@ export class AppController {
       buyDto.amount,
       req.user.username,
     );
+  }
+
+  @Post('reset')
+  @UseGuards(AuthGuard)
+  @Roles(Role.BUYER)
+  async reset(@Req() req: Request & { user: User }) {
+    return this.userService.reset(req.user.username);
   }
 }

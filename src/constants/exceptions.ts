@@ -8,3 +8,8 @@ export const INCORRECT_PASSWORD = new HttpException(
   'Authentication Failed: Incorrect Password',
   HttpStatus.BAD_REQUEST,
 );
+
+export const SESSION_TERMINATED = new HttpException(
+  'Session Terminated: Authenticate to continue',
+  HttpStatus.UNAUTHORIZED,
+);
