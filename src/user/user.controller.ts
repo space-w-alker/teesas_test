@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
-import { User } from '../models';
 import { CreateUserDto, LoginDto } from './user.dto';
 import { UserService } from './user.service';
 import { ApiHeader } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
+import { User } from './user.model';
 
 @ApiHeader({ name: 'authorizations', required: false, allowReserved: true })
 @Controller('user')
@@ -16,7 +16,7 @@ export class UserController {
 
   @Get()
   @UseGuards(AuthGuard)
-  async getUser(@Req() req: any): Promise<User> {
+  async getUser(@Req() req: Request & { user: User }): Promise<User> {
     return req.user;
   }
 
