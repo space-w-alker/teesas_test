@@ -50,6 +50,7 @@ export class AppController {
   @Get('logout/all')
   @UseGuards(AuthGuard)
   async logoutAll(@Req() req: Request & { user: User }) {
-    return this.userService.deleteAllSessions(req.user.username);
+    await this.userService.deleteAllSessions(req.user.username);
+    return { message: 'Logged out of all accounts' };
   }
 }

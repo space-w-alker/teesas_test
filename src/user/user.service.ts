@@ -72,7 +72,7 @@ export class UserService {
   }
 
   async updateUser(user: UpdateUserDto, username: string) {
-    this.repo.update({ username: username }, user);
+    this.repo.save({ ...user, username });
     return this.findByUsername(username);
   }
 
