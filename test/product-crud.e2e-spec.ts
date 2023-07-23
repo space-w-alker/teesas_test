@@ -26,7 +26,7 @@ describe('AppController (e2e)', () => {
       .overrideProvider(getRepositoryToken(User))
       .useValue(new MockRepository(MOCK_USERS, 'username'))
       .overrideProvider(getRepositoryToken(Product))
-      .useValue(new MockRepository(MOCK_PRODUCTS, 'id'))
+      .useValue(new MockRepository(MOCK_PRODUCTS, 'id', true))
       .overrideGuard(AuthGuard)
       .useClass(MockAuthGuard)
       .compile();
@@ -45,36 +45,60 @@ describe('AppController (e2e)', () => {
     server.close();
   });
 
-  it('/buy (POST)', async () => {
+  it('/product (POST)', async () => {
     await request(server)
-      .post('/buy')
-      .send({ productId: '53b816e5-3763-4139-9581-fe12f53a8cfc', amount: 50 })
-      .expect(201, {
-        totalSpent: 50,
-        productPurchased: '10 x Super product 1',
-        change: [
-          { count: 2, value: 100 },
-          { count: 1, value: 50 },
-        ],
+      .post('/product')
+      .send({
+        productName: 'Super Product',
+        amountAvailable: 10,
+        cost: 5,
+      })
+      .expect(201);
+  });
+
+  it('/product (PUT)', async () => {
+    await request(server)
+      .put('/product')
+      .send({
+        id: '53b816e5-3763-4139-9581-fe12f53a8cfc',
+        productName: 'Elite Product',
+        amountAvailable: 10,
+        cost: 5,
+      })
+      .expect(200, {
+        amountAvailable: 10,
+        id: '53b816e5-3763-4139-9581-fe12f53a8cfc',
+        cost: 5,
+        productName: 'Elite Product',
+        seller: {
+          role: 'buyer',
+          deposit: 300,
+          password: '1234',
+          username: 'user1',
+          products: [],
+          sessions: [],
+        },
       });
   });
 
-  it('/deposit (POST)', async () => {
+  it('/product (GET)', async () => {
+    await request(server).get('/product').expect(200);
+  });
+
+  it('/product (GET/:id)', async () => {
     await request(server)
-      .post('/deposit')
-      .send({ amount: 30 })
-      .expect(400, {
-        message: ['Value is not a valid denomination. 100,50,20,10,5'],
-        error: 'Bad Request',
-        statusCode: 400,
+      .get('/product/93292e17-7598-4261-bade-1b0f5bfc5563')
+      .expect(200, {
+        amountAvailable: 4,
+        id: '93292e17-7598-4261-bade-1b0f5bfc5563',
+        cost: 8,
+        productName: 'Super product 2',
       });
-    await request(server).post('/deposit').send({ amount: 50 }).expect(201, {
-      role: 'buyer',
-      deposit: 50,
-      password: '1234',
-      username: 'user1',
-      products: [],
-      sessions: [],
-    });
+  });
+
+  it('/product (DELETE/:id)', async () => {
+    await request(server)
+      .delete('/product/93292e17-7598-4261-bade-1b0f5bfc5563')
+      .expect(200, { rows: 1 });
   });
 });

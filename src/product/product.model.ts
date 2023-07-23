@@ -7,8 +7,10 @@ import {
   ManyToOne,
   JoinColumn,
   Entity,
+  RelationId,
 } from 'typeorm';
 import { User } from '../user/user.model';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Product {
@@ -26,7 +28,11 @@ export class Product {
 
   @ManyToOne(() => User, (user) => user.products)
   @JoinColumn()
+  @Exclude()
   seller?: User;
+
+  @RelationId((product: Product) => product.seller)
+  sellerId?: string;
 
   @CreateDateColumn()
   dateCreated?: Date;

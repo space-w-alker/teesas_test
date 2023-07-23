@@ -5,7 +5,12 @@ import { CreateUserDto, DepositDto, LoginDto, UpdateUserDto } from './user.dto';
 import { Session, User } from './user.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { INCORRECT_PASSWORD, USER_EXISTS } from '../constants/exceptions';
+import {
+  INCORRECT_PASSWORD,
+  INVALID_TOKEN,
+  USER_EXISTS,
+  USER_NOT_EXISTS,
+} from '../constants/exceptions';
 
 const JWT_SECRET = 'json_web_token_secret';
 
@@ -37,38 +42,50 @@ export class UserService {
 
   async login(login: LoginDto): Promise<User> {
     await this.clearInactiveSessions(login.username);
-    const password = await this.getUserPassword(login.username);
     const user = await this.findByUsername(login.username);
-    const isPasswordCorrect = await bcrypt.compare(login.password, password);
+    const isPasswordCorrect = await bcrypt.compare(
+      login.password,
+      user.password,
+    );
     if (!isPasswordCorrect) {
       throw INCORRECT_PASSWORD;
     }
     const token = jwt.sign({ username: user.username }, JWT_SECRET, {
       expiresIn: '1H',
     });
-    user.sessions.push({ token: token });
+    user.token = token;
     user.warning =
-      user.sessions.length > 0 &&
-      'There is already an active session using your account';
+      user.sessions.length > 0
+        ? 'There is already an active session using your account'
+        : undefined;
+    user.sessions.push({ token: token });
     return await this.repo.save(user);
   }
 
   async findByUsername(username: string) {
-    const user = await this.repo.findOneByOrFail({ username });
-    return user;
-  }
-
-  async getUserPassword(username: string) {
-    const user = await this.repo.findOneByOrFail({ username });
-    return user.password;
+    try {
+      const user = await this.repo.findOneByOrFail({ username });
+      return user;
+    } catch (error) {
+      throw USER_NOT_EXISTS;
+    }
   }
 
   async updateUser(user: UpdateUserDto, username: string) {
     this.repo.update({ username: username }, user);
+    return this.findByUsername(username);
+  }
+
+  async deleteUser(username: string) {
+    const res = await this.repo.delete({ username });
+    return res.affected;
+  }
+
+  async deleteAllSessions(username: string) {
+    await this.sessionRepo.delete({ user: { username } });
   }
 
   async deposit(depositDto: DepositDto, username: string) {
-    console.log(await this.findByUsername(username));
     await this.repo.increment({ username }, 'deposit', depositDto.amount);
     return this.findByUsername(username);
   }
@@ -93,16 +110,10 @@ export class UserService {
   }
 
   verifyToken(token: string) {
-    return jwt.verify(token, JWT_SECRET) as User;
-  }
-}
-
-export class Convert {
-  public static toUser(json: any): User {
-    return json;
-  }
-
-  public static userToJson(value: User): string {
-    return JSON.stringify(value);
+    try {
+      return jwt.verify(token, JWT_SECRET) as User;
+    } catch (error) {
+      throw INVALID_TOKEN;
+    }
   }
 }

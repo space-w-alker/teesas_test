@@ -50,7 +50,7 @@ export class ProductController {
   @Delete(':id')
   @Roles(Role.SELLER)
   async deleteProduct(@Param('id') id: string) {
-    return await this.productService.deleteProduct(id);
+    return { rows: await this.productService.deleteProduct(id) };
   }
 
   @Get(':id')

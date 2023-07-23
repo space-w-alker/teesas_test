@@ -33,6 +33,7 @@ export class User {
   @OneToMany(() => Session, (session) => session.user, {
     cascade: true,
     eager: true,
+    onDelete: 'CASCADE',
   })
   @Exclude()
   sessions: Session[];

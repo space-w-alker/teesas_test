@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from './auth/auth.guard';
 import { Role, User } from './user/user.model';
 import { UserService } from './user/user.service';
@@ -40,10 +40,16 @@ export class AppController {
     );
   }
 
-  @Post('reset')
+  @Get('reset')
   @UseGuards(AuthGuard)
   @Roles(Role.BUYER)
   async reset(@Req() req: Request & { user: User }) {
     return this.userService.reset(req.user.username);
+  }
+
+  @Get('logout/all')
+  @UseGuards(AuthGuard)
+  async logoutAll(@Req() req: Request & { user: User }) {
+    return this.userService.deleteAllSessions(req.user.username);
   }
 }

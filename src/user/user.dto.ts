@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsPositive, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from './user.model';
-import { IsInArray } from '../decorators';
+import { IsInArray, StrongPassword } from '../decorators';
 import { DENOMINATION } from '../constants/denomination';
 
 export class CreateUserDto {
@@ -11,6 +11,7 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsString()
+  @StrongPassword()
   password: string;
 
   @ApiProperty({ enumName: 'Role', enum: Role })
@@ -26,6 +27,7 @@ export class UpdateUserDto {
 
   @ApiProperty()
   @IsString()
+  @StrongPassword()
   @IsOptional()
   password?: string;
 
@@ -43,6 +45,12 @@ export class LoginDto {
   @ApiProperty()
   @IsString()
   password: string;
+}
+
+export class DeleteUserDto {
+  @ApiProperty()
+  @IsString()
+  username: string;
 }
 
 export class DepositDto {

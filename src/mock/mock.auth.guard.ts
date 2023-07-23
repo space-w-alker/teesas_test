@@ -14,7 +14,7 @@ export class MockAuthGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const compute = async () => {
-      const user = await this.userService.findByUsername('user.username');
+      const user = await this.userService.findByUsername('user1');
       request.user = user;
       return true;
     };

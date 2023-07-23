@@ -20,7 +20,7 @@ export class ProductService {
 
   async updateProduct(updateDto: UpdateProductDto, sellerId: string) {
     const user = await this.userService.findByUsername(sellerId);
-    this.repo.save({ ...updateDto, seller: user });
+    return this.repo.save({ ...updateDto, seller: user });
   }
 
   async deleteProduct(productId: string) {
@@ -42,6 +42,7 @@ export class ProductService {
     const actualAmount = Math.min(
       Math.floor(user.deposit / product.cost),
       amount,
+      product.amountAvailable,
     );
     const totalCost = actualAmount * product.cost;
     user.deposit -= totalCost;
@@ -52,7 +53,7 @@ export class ProductService {
     await this.userService.updateUser(user, user.username);
     return {
       totalSpent: totalCost,
-      productPurchased: `${actualAmount} * ${product.productName}`,
+      productPurchased: `${actualAmount} x ${product.productName}`,
       change: change.filter((ch) => ch.count > 0),
     };
   }

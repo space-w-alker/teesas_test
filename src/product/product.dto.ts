@@ -26,6 +26,7 @@ export class CreateProductDto {
 export class UpdateProductDto {
   @ApiProperty()
   @IsString()
+  @IsUUID()
   id: string;
 
   @ApiProperty()
